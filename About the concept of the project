@@ -1,1 +1,30 @@
 
+
+<b>The concept of the project is :
+
+
+PIR detects motion
+        │
+        ▼
+Ultrasonic measures distance
+        │
+        ▼
+AMG8833 captures thermal image
+        │
+        ▼
+Adjust expected blob size based on distance
+        │
+        ▼
+Extract features:
+    - Hot pixel count
+    - Width
+    - Height
+    - Aspect ratio
+    - Maximum temperature
+    - Center position
+        │
+        ▼
+Classify:
+    Human
+    Animal
+    Unknown
