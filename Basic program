@@ -1,0 +1,178 @@
+#include <Wire.h>
+#include <Adafruit_AMG88xx.h>
+
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+
+#include <UniversalTelegramBot.h>
+#include <ArduinoJson.h>
+
+//==============================
+// WiFi
+//==============================
+
+const char* ssid = "YOUR_WIFI_NAME";
+const char* password = "YOUR_WIFI_PASSWORD";
+
+//==============================
+// Telegram
+//==============================
+
+#define BOTtoken "YOUR_BOT_TOKEN"
+
+#define CHAT_ID "YOUR_CHAT_ID"
+
+WiFiClientSecure client;
+UniversalTelegramBot bot(BOTtoken, client);
+
+//==============================
+// AMG8833
+//==============================
+
+Adafruit_AMG88xx amg;
+
+float pixels[64];
+
+//==============================
+// Pins
+//==============================
+
+#define PIR_PIN 27
+#define LED_PIN 25
+#define BUZZER_PIN 26
+
+//==============================
+
+float thresholdTemp = 31.0;
+
+bool alreadySent = false;
+
+//==============================
+
+void setup()
+{
+
+Serial.begin(115200);
+
+pinMode(PIR_PIN, INPUT);
+
+pinMode(LED_PIN, OUTPUT);
+
+pinMode(BUZZER_PIN, OUTPUT);
+
+digitalWrite(LED_PIN, LOW);
+
+digitalWrite(BUZZER_PIN, LOW);
+
+//------------------------------
+
+Wire.begin(21,22);
+
+if(!amg.begin())
+{
+Serial.println("AMG8833 NOT FOUND!");
+
+while(1);
+}
+
+Serial.println("AMG8833 OK");
+
+//------------------------------
+
+WiFi.begin(ssid,password);
+
+Serial.print("Connecting WiFi");
+
+while(WiFi.status()!=WL_CONNECTED)
+{
+delay(500);
+Serial.print(".");
+}
+
+Serial.println();
+
+Serial.println("WiFi Connected");
+
+client.setInsecure();
+
+bot.sendMessage(CHAT_ID,"ESP32 Animal Detection System Started","");
+}
+
+//=================================================
+
+void loop()
+{
+
+bool motion = digitalRead(PIR_PIN);
+
+amg.readPixels(pixels);
+
+//------------------------------------------
+// Send 64 temperatures to Python
+//------------------------------------------
+
+for(int i=0;i<64;i++)
+{
+Serial.print(pixels[i]);
+
+if(i<63)
+Serial.print(",");
+}
+
+Serial.println();
+
+//------------------------------------------
+// Find hottest pixel
+//------------------------------------------
+
+float hottest = pixels[0];
+
+for(int i=1;i<64;i++)
+{
+
+if(pixels[i]>hottest)
+{
+hottest=pixels[i];
+}
+
+}
+
+//------------------------------------------
+
+if(motion && hottest>thresholdTemp)
+{
+
+digitalWrite(LED_PIN,HIGH);
+
+digitalWrite(BUZZER_PIN,HIGH);
+
+if(!alreadySent)
+{
+
+String msg="⚠ Motion Detected!\n";
+msg+="Warm Object Found\n";
+msg+="Max Temp: ";
+msg+=String(hottest);
+msg+=" C";
+
+bot.sendMessage(CHAT_ID,msg,"");
+
+alreadySent=true;
+
+}
+
+}
+else
+{
+
+digitalWrite(LED_PIN,LOW);
+
+digitalWrite(BUZZER_PIN,LOW);
+
+alreadySent=false;
+
+}
+
+delay(100);
+
+}
