@@ -28,6 +28,15 @@ Buzzer	ESP32
 LED	ESP32
 Long leg (+)	GPIO25 through 220 Ω resistor
 Short leg (–)	GND
+5. ultrasonic sensor
+ 	Connections
+HC-SR04	ESP32
+VCC -	5V (VIN)
+GND -	GND
+TRIG	- GPIO 32
+ECHO	- GPIO 33 (through a voltage divider)
+
+
 Pin Summary
 GPIO21  → AMG8833 SDA
 GPIO22  → AMG8833 SCL
