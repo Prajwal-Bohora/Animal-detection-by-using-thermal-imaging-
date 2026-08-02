@@ -11,16 +11,16 @@
 // WiFi
 //==============================
 
-const char* ssid = "khukuricross_fsrkt";
-const char* password = "@adsuppliers";
+const char* ssid = "              ";
+const char* password = "             ";
 
 //==============================
 // Telegram
 //==============================
 
-#define BOTtoken "8962379331:AAFXivqq5pbB8paqEd5ic9hdaf_RUYRrAUg"
+#define BOTtoken "                     "
 
-#define CHAT_ID "8577077243"
+#define CHAT_ID "                      "
 
 WiFiClientSecure client;
 UniversalTelegramBot bot(BOTtoken, client);
